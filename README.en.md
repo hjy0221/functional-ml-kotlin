@@ -26,6 +26,69 @@ val df = grad(f)
 println(df(2.0)) // 7.0
 ```
 
+## Interactive Environment Setup
+
+The notebook environment has been verified on macOS with JDK 21, JupyterLab, and the Kotlin Jupyter Kernel.
+
+### 1. Check JDK 21
+
+```bash
+/usr/libexec/java_home -v 21
+```
+
+Install JDK 21 if it is not available:
+
+```bash
+brew install --cask corretto@21
+```
+
+### 2. Install JupyterLab
+
+```bash
+brew install jupyterlab
+```
+
+### 3. Install the Kotlin kernel
+
+Install the Kotlin kernel into the isolated Python environment managed by Homebrew for JupyterLab:
+
+```bash
+JUPYTER_PYTHON="$(brew --prefix jupyterlab)/libexec/bin/python"
+"$JUPYTER_PYTHON" -m pip install --upgrade kotlin-jupyter-kernel
+"$JUPYTER_PYTHON" -m kotlin_kernel fix-kernelspec-location
+```
+
+Register a kernel that uses the same JDK 21 as the project:
+
+```bash
+JDK_21_HOME=$(/usr/libexec/java_home -v 21)
+"$JUPYTER_PYTHON" -m kotlin_kernel add-kernel --name "JDK 21" --jdk "$JDK_21_HOME" --force
+```
+
+Verify the installation:
+
+```bash
+jupyter kernelspec list
+```
+
+The environment is ready when `kotlin_jdk_21` appears in the list.
+
+## Run the Kotlin Notebook
+
+The following command builds the local JAR and opens the example in JupyterLab:
+
+```bash
+./gradlew notebook
+```
+
+When the browser opens, run [`notebooks/forward-mode-ad.ipynb`](notebooks/forward-mode-ad.ipynb) from top to bottom. The notebook loads the prepared JAR and interactively demonstrates function definition, `valueAndGrad`, `grad`, `sin`, and `exp`.
+
+To prepare only the JAR without opening a browser, run:
+
+```bash
+./gradlew prepareNotebook
+```
+
 ## Run Example
 
 ```bash

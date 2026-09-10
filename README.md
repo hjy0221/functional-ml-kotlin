@@ -26,6 +26,69 @@ val df = grad(f)
 println(df(2.0)) // 7.0
 ```
 
+## 대화형 환경 구축
+
+이 프로젝트의 Notebook 환경은 macOS, JDK 21, JupyterLab, Kotlin Jupyter Kernel 조합으로 검증했습니다.
+
+### 1. JDK 21 확인
+
+```bash
+/usr/libexec/java_home -v 21
+```
+
+JDK 21이 없다면 먼저 설치합니다.
+
+```bash
+brew install --cask corretto@21
+```
+
+### 2. JupyterLab 설치
+
+```bash
+brew install jupyterlab
+```
+
+### 3. Kotlin 커널 설치
+
+Homebrew가 관리하는 JupyterLab의 격리된 Python 환경에 Kotlin 커널을 설치합니다.
+
+```bash
+JUPYTER_PYTHON="$(brew --prefix jupyterlab)/libexec/bin/python"
+"$JUPYTER_PYTHON" -m pip install --upgrade kotlin-jupyter-kernel
+"$JUPYTER_PYTHON" -m kotlin_kernel fix-kernelspec-location
+```
+
+프로젝트와 동일한 JDK 21을 사용하는 커널을 등록합니다.
+
+```bash
+JDK_21_HOME=$(/usr/libexec/java_home -v 21)
+"$JUPYTER_PYTHON" -m kotlin_kernel add-kernel --name "JDK 21" --jdk "$JDK_21_HOME" --force
+```
+
+설치 결과를 확인합니다.
+
+```bash
+jupyter kernelspec list
+```
+
+목록에 `kotlin_jdk_21`이 표시되면 준비가 끝난 것입니다.
+
+## Kotlin Notebook 실행
+
+다음 명령은 로컬 JAR를 만든 뒤 JupyterLab에서 예제 Notebook을 엽니다.
+
+```bash
+./gradlew notebook
+```
+
+브라우저가 열리면 [`notebooks/forward-mode-ad.ipynb`](notebooks/forward-mode-ad.ipynb)의 셀을 위에서부터 실행합니다. Notebook은 준비된 JAR를 불러와 함수 정의, `valueAndGrad`, `grad`, `sin`, `exp`를 대화형으로 실행합니다.
+
+브라우저를 자동으로 열지 않고 JAR만 준비하려면 다음 명령을 사용합니다.
+
+```bash
+./gradlew prepareNotebook
+```
+
 ## 예제 실행
 
 ```bash
