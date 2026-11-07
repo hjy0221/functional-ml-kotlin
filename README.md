@@ -8,7 +8,7 @@
 
 目標はPyTorchを複製することではありません。 JAXのように関数を中心APIとして使用し、パラメータを明示的に扱い、微分を高次関数として表現する設計を段階的に実装します。
 
-＃＃ステップ1：Dual NumberベースのForward-Mode AD
+## ステップ1：Dual NumberベースのForward-Mode AD
 
 現在実装されている機能：
 
