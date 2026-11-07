@@ -4,47 +4,22 @@
 
 ## 日本語
 
-関数型設計から ML フレームワークの内部を学ぶ、小さな Kotlin プロジェクトです。PyTorch の複製ではなく、JAX のように関数を主 API とし、パラメーターを明示し、高階関数として微分を扱う設計を段階的に実装します。
+関数型設計を通じてMLフレームワークの内部動作を学習する小さなKotlinプロジェクト。
 
-### 第1段階: Dual Number による forward-mode AD
+目標はPyTorchを複製することではありません。 JAXのように関数を中心APIとして使用し、パラメータを明示的に扱い、微分を高次関数として表現する設計を段階的に実装します。
 
-- スカラー自動微分の `Dual(value, derivative)`
-- `Dual` と `Double` の `+`、`*`
-- `sin`、`exp`
-- 値と微分を同時に計算する `valueAndGrad(f, x)`
-- `(Dual) -> Dual` を `(Double) -> Double` に変換する `grad(f)`
-- `f(x) = x^2 + 3x` と連鎖律のテスト
+＃＃ステップ1：Dual NumberベースのForward-Mode AD
 
-### 実行
+現在実装されている機能：
 
-macOS、JDK 21、JupyterLab、Kotlin Jupyter Kernel でノートブック環境を確認しています。JDK と JupyterLab、Kotlin カーネルの設定手順は英語・韓国語セクションにあります。
+- スカラーforward-modeの自動微分のための`Dual(value, derivative)`
+- `Dual`と`Double`の`+`、`*`演算子のオーバーロード
+- 基本関数`sin`、`exp`
+- 関数値と微分値を一緒に計算する`valueAndGrad(f, x)`
+- `(Dual) -> Dual`関数を`(Double) -> Double`微分関数に変換する`grad(f)`
+- `f(x) = x^2 + 3x`と連鎖法則テスト
 
-```bash
-./gradlew notebook
-./gradlew run
-./gradlew test
-```
-
-`notebooks/forward-mode-ad.ipynb` は関数定義、`valueAndGrad`、`grad`、`sin`、`exp` を対話的に示します。次の段階では Scalar MLP、Tensor、損失関数、純粋 SGD、計算グラフ、最適化を追加する予定です。
-
-## English
-
-A tiny Kotlin project for learning ML framework internals through a functional design.
-
-The goal is not to clone PyTorch. The first milestone follows the spirit of JAX: functions are the main API, parameters stay explicit, and differentiation is exposed as a higher-order function.
-
-## Stage 1: Forward-Mode AD With Dual Numbers
-
-Implemented:
-
-- `Dual(value, derivative)` for scalar forward-mode automatic differentiation
-- `+` and `*` operator overloads for `Dual` and `Double`
-- elementary functions: `sin`, `exp`
-- `valueAndGrad(f, x)` to evaluate a function and its derivative together
-- `grad(f)` to transform `(Dual) -> Dual` into `(Double) -> Double`
-- tests for `f(x) = x^2 + 3x`
-
-Example:
+使用例：
 
 ```kotlin
 val f: (Dual) -> Dual = { x -> x * x + 3.0 * x }
@@ -53,9 +28,150 @@ val df = grad(f)
 println(df(2.0)) // 7.0
 ```
 
-## Interactive Environment Setup
+## 対話型環境の構築
 
-The notebook environment has been verified on macOS with JDK 21, JupyterLab, and the Kotlin Jupyter Kernel.
+このプロジェクトのノートブック環境は、macOS、JDK 21、JupyterLab、Kotlin Jupyter Kernelの組み合わせで検証しました。
+
+### 1. JDK 21の確認
+
+```bash
+/usr/libexec/java_home -v 21
+```
+
+JDK 21がない場合は、まずインストールします。
+
+```bash
+brew install --cask corretto@21
+```
+
+### 2. JupyterLabのインストール
+
+```bash
+brew install jupyterlab
+```
+
+### 3. Kotlinカーネルのインストール
+
+Homebrewが管理するJupyterLabの孤立したPython環境にKotlinカーネルをインストールします。
+
+```bash
+JUPYTER_PYTHON="$(brew --prefix jupyterlab)/libexec/bin/python"
+"$JUPYTER_PYTHON" -m pip install --upgrade kotlin-jupyter-kernel
+"$JUPYTER_PYTHON" -m kotlin_kernel fix-kernelspec-location
+```
+
+プロジェクトと同じJDK 21を使用するカーネルを登録します。
+
+```bash
+JDK_21_HOME=$(/usr/libexec/java_home -v 21)
+"$JUPYTER_PYTHON" -m kotlin_kernel add-kernel --name "JDK 21" --jdk "$JDK_21_HOME" --force
+```
+
+インストール結果を確認してください。
+
+```bash
+jupyter kernelspec list
+```
+
+リストに`kotlin_jdk_21`が表示されたら、準備は完了です。
+
+## Kotlin Notebookの実行
+
+次のコマンドはローカルJARを作成し、JupyterLabでサンプルノートブックを開きます。
+
+```bash
+./gradlew notebook
+```
+
+ブラウザが開いたら、[`notebooks/forward-mode-ad.ipynb`](notebooks/forward-mode-ad.ipynb)のセルを上から実行します。ノートブックは準備されたJARを呼び出し、関数定義、`valueAndGrad`、`grad`、`sin`、`exp`を対話的に実行します。
+
+ブラウザを自動的に開かずにJARのみを準備するには、次のコマンドを使用します。
+
+```bash
+./gradlew prepareNotebook
+```
+
+## 例の実行
+
+```bash
+./gradlew run
+```
+
+予想出力：
+
+```text
+f(x) = x^2 + 3x
+x = 2.0
+f(x) = 10.0
+f'(x) = 7.0
+```
+
+## テストの実行
+
+```bash
+./gradlew test
+```
+
+## 拡張ロードマップ
+
+1. Scalar MLP
+   - `relu`、減算、除算、単項負数、`pow`を追加します。
+   - スカラー階層パラメータを明示的なデータクラスで表します。
+   - `linear`、活性化関数、小さなMLPを純粋関数として合成します。
+
+2. Tensor
+   - shapeと平坦化された記憶空間を持つ不変`Tensor`を導入します。
+   - `map`、`zipWith`、`sum`、`dot`、`matmul`とブロードキャストルールを追加します。
+   - Tensor 操作を変更可能な学習状態から切り離します。
+
+3. Loss
+   - MSEから実装します。
+   - その後、binary cross entropyとsoftmax cross entropyを追加します。
+   - 損失関数APIは`loss(params, batch): Scalar`の形式を維持します。
+
+4. Optimizer
+   - 純粋関数型SGDである`update(params, grads, learningRate): Params`から始まります。
+   - パラメータツリー構造が安定したら、 momentum または Adam を追加します。
+
+5. Computation Graph/IR
+   - `sealed class` ベースの小さな式ツリーを作成します。
+   - グラフ構成と評価を分離します。
+   - IRを介してスカラープログラムを調べ、変換またはコンパイルします。
+
+6. Optimization
+   - constant foldingのような単純なグラフ書き換えから実装します。
+   - 式同等性規則を定義した後、common subexpression eliminationを追加します。
+   - Tensor操作をより小さな実行コアにローワーする方法を探る。
+
+## English
+
+A small Kotlin project to learn the inner workings of ML frameworks through functional design.
+
+The goal is not to clone PyTorch. Like JAX, we implement a step-by-step design that uses functions as the central API, handles parameters explicitly, and expresses derivatives as higher-order functions.
+
+## Step 1: Dual Number based Forward-Mode AD
+
+Currently implemented features:
+
+- `Dual(value, derivative)` for scalar forward-mode automatic differentiation
+- `+`, `*` operator overloads of `Dual` and `Double`
+- Basic functions `sin`, `exp`
+- `valueAndGrad(f, x)` calculates function values and differential values together
+- `grad(f)`, which converts the `(Dual) -> Dual` function to the `(Double) -> Double` differential function.
+- `f(x) = x^2 + 3x` and chain rule testing
+
+Example usage:
+
+```kotlin
+val f: (Dual) -> Dual = { x -> x * x + 3.0 * x }
+val df = grad(f)
+
+println(df(2.0)) // 7.0
+```
+
+## Building an interactive environment
+
+The notebook environment for this project was verified using a combination of macOS, JDK 21, JupyterLab, and Kotlin Jupyter Kernel.
 
 ### 1. Check JDK 21
 
@@ -63,7 +179,7 @@ The notebook environment has been verified on macOS with JDK 21, JupyterLab, and
 /usr/libexec/java_home -v 21
 ```
 
-Install JDK 21 if it is not available:
+If you don't have JDK 21, install it first.
 
 ```bash
 brew install --cask corretto@21
@@ -75,9 +191,9 @@ brew install --cask corretto@21
 brew install jupyterlab
 ```
 
-### 3. Install the Kotlin kernel
+### 3. Install Kotlin kernel
 
-Install the Kotlin kernel into the isolated Python environment managed by Homebrew for JupyterLab:
+Install the Kotlin kernel into an isolated Python environment in JupyterLab managed by Homebrew.
 
 ```bash
 JUPYTER_PYTHON="$(brew --prefix jupyterlab)/libexec/bin/python"
@@ -85,44 +201,44 @@ JUPYTER_PYTHON="$(brew --prefix jupyterlab)/libexec/bin/python"
 "$JUPYTER_PYTHON" -m kotlin_kernel fix-kernelspec-location
 ```
 
-Register a kernel that uses the same JDK 21 as the project:
+Register a kernel using the same JDK 21 as your project.
 
 ```bash
 JDK_21_HOME=$(/usr/libexec/java_home -v 21)
 "$JUPYTER_PYTHON" -m kotlin_kernel add-kernel --name "JDK 21" --jdk "$JDK_21_HOME" --force
 ```
 
-Verify the installation:
+Check the installation results.
 
 ```bash
 jupyter kernelspec list
 ```
 
-The environment is ready when `kotlin_jdk_21` appears in the list.
+If you see `kotlin_jdk_21` in the list, you're ready.
 
-## Run the Kotlin Notebook
+## Run Kotlin Notebook
 
-The following command builds the local JAR and opens the example in JupyterLab:
+The following command creates a local JAR and then opens the example notebook in JupyterLab.
 
 ```bash
 ./gradlew notebook
 ```
 
-When the browser opens, run [`notebooks/forward-mode-ad.ipynb`](notebooks/forward-mode-ad.ipynb) from top to bottom. The notebook loads the prepared JAR and interactively demonstrates function definition, `valueAndGrad`, `grad`, `sin`, and `exp`.
+When the browser opens, run the cell [`notebooks/forward-mode-ad.ipynb`](notebooks/forward-mode-ad.ipynb) from above. The notebook loads the prepared JAR and interactively runs the function definitions, `valueAndGrad`, `grad`, `sin`, and `exp`.
 
-To prepare only the JAR without opening a browser, run:
+To just prepare the JAR without automatically opening the browser, use the following command:
 
 ```bash
 ./gradlew prepareNotebook
 ```
 
-## Run Example
+## Run example
 
 ```bash
 ./gradlew run
 ```
 
-Expected result:
+Expected output:
 
 ```text
 f(x) = x^2 + 3x
@@ -131,7 +247,7 @@ f(x) = 10.0
 f'(x) = 7.0
 ```
 
-## Run Tests
+## Run tests
 
 ```bash
 ./gradlew test
@@ -139,34 +255,34 @@ f'(x) = 7.0
 
 ## Expansion Roadmap
 
-1. Scalar MLP
-   - Add `relu`, subtraction, division, unary minus, and `pow`.
-   - Represent scalar layer parameters explicitly with data classes.
-   - Build pure functions for `linear`, activation, and small MLP composition.
+1. Scalar MLPs
+   - Add `relu`, subtraction, division, unary negative, `pow`.
+   - Express scalar layer parameters as explicit data classes.
+   - `linear`, activation function, synthesizes small MLPs into pure functions.
 
 2. Tensor
-   - Introduce immutable `Tensor` with shape and flat storage.
-   - Add `map`, `zipWith`, `sum`, `dot`, `matmul`, and broadcasting rules.
-   - Keep tensor operations independent from mutable training state.
+   - Introduce an immutable `Tensor` with shape and flattened storage.
+   - Add broadcasting rules with `map`, `zipWith`, `sum`, `dot`, `matmul`.
+   - Separate tensor operations from mutable learning states.
 
-3. Loss Functions
-   - Add MSE first.
-   - Later add binary cross entropy and softmax cross entropy.
-   - Keep the loss API as `loss(params, batch): Scalar`.
+3.Loss
+   - Implemented starting from MSE.
+   - Afterwards, binary cross entropy and softmax cross entropy are added.
+   - The loss function API maintains the form `loss(params, batch): Scalar`.
 
 4. Optimizer
-   - Start with pure SGD: `update(params, grads, learningRate): Params`.
-   - Add momentum or Adam after the parameter tree structure is stable.
+   - We start with `update(params, grads, learningRate): Params`, a purely functional SGD.
+   - Once the parameter tree structure is stable, add momentum or Adam.
 
 5. Computation Graph / IR
-   - Add a small expression tree with a `sealed class`.
-   - Separate graph construction from evaluation.
-   - Use the IR to inspect, transform, or compile scalar programs.
+   - Create a small expression tree based on `sealed class`.
+   - Separate graph construction and evaluation.
+   - Inspect and convert or compile Scala programs via IR.
 
-6. Optimization
-   - Add simple graph rewrites such as constant folding.
-   - Add common subexpression elimination once expression identity is defined.
-   - Explore lowering tensor operations into a smaller execution core.
+6.Optimization
+   - Implement simple graph rewriting such as constant folding.
+   - After determining expression equality rules, add common subexpression elimination.
+   - Explore lowering tensor operations to smaller execution cores.
 
 ## 한국어
 
