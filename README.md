@@ -4,8 +4,6 @@
 
 ## 日本語
 
-[日本語](https://github.com/hjy0221/functional-ml-kotlin#%E6%97%A5%E6%9C%AC%E8%AA%9E) · [English](https://github.com/hjy0221/functional-ml-kotlin#english) · [한국어](https://github.com/hjy0221/functional-ml-kotlin#%ED%95%9C%EA%B5%AD%EC%96%B4)
-
 関数型設計を通じてMLフレームワークの内部動作を学習する小さなKotlinプロジェクト。
 
 目標はPyTorchを複製することではありません。 JAXのように関数を中心APIとして使用し、パラメータを明示的に扱い、微分を高次関数として表現する設計を段階的に実装します。
@@ -147,8 +145,6 @@ f'(x) = 7.0
 
 ## English
 
-[日本語](https://github.com/hjy0221/functional-ml-kotlin#%E6%97%A5%E6%9C%AC%E8%AA%9E) · [English](https://github.com/hjy0221/functional-ml-kotlin#english) · [한국어](https://github.com/hjy0221/functional-ml-kotlin#%ED%95%9C%EA%B5%AD%EC%96%B4)
-
 A small Kotlin project to learn the inner workings of ML frameworks through functional design.
 
 The goal is not to clone PyTorch. Like JAX, we implement a step-by-step design that uses functions as the central API, handles parameters explicitly, and expresses derivatives as higher-order functions.
@@ -289,8 +285,6 @@ f'(x) = 7.0
    - Explore lowering tensor operations to smaller execution cores.
 
 ## 한국어
-
-[日本語](https://github.com/hjy0221/functional-ml-kotlin#%E6%97%A5%E6%9C%AC%E8%AA%9E) · [English](https://github.com/hjy0221/functional-ml-kotlin#english) · [한국어](https://github.com/hjy0221/functional-ml-kotlin#%ED%95%9C%EA%B5%AD%EC%96%B4)
 
 함수형 설계를 통해 ML 프레임워크의 내부 동작을 학습하는 작은 Kotlin 프로젝트입니다.
 
